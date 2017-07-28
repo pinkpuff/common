@@ -1,4 +1,3 @@
-#include once "queue.bas"
 #include once "functions/roll.bas"
 
 type Deck
@@ -15,6 +14,7 @@ type Deck
  declare function Top() as String
 
  declare sub AddCard(label as String)
+ declare sub Destroy()
  declare sub Shuffle()
 
 end type
@@ -24,7 +24,7 @@ function Deck.Draw() as String
 
  dim result as String
 
- result = cards.Head()
+ result = cards.ItemAt(1)
  cards.Remove(1)
 
  return result
@@ -53,7 +53,7 @@ end function
 
 function Deck.Top() as String
 
- return cards.Head()
+ return cards.ItemAt(1)
 
 end function
 
@@ -65,9 +65,16 @@ sub Deck.AddCard(label as String)
 end sub
 
 
+sub Deck.Destroy()
+
+ cards.Destroy()
+
+end sub
+
+
 sub Deck.Shuffle()
 
- for i as UInteger = 1 to cards.Length()
+ for i as Integer = 1 to cards.Length()
   cards.Exchange(i, RollDie(cards.Length() - i + 1) + i - 1)
  next
 

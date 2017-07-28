@@ -1,5 +1,3 @@
-#include once "../boolean.bas"
-
 function Pad(s as String, length as UInteger, pad_from_front as Boolean = false, letter as String = " ") as String
 
  dim result as String

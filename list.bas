@@ -11,13 +11,12 @@ type List
  
  declare static function Merge(list1 as List, list2 as List) as List
  
- declare function Head() as String
+ declare function Contains(item as String) as Boolean
  declare function IsEmpty() as Boolean
  declare function ItemAt(index as UInteger) as String
  declare function Length() as UInteger
  declare function PointerAt(index as UInteger) as Any ptr
  declare function Slice(start as UInteger = 1, finish as UInteger = 0) as List
- declare function Tail() as List
  declare function Width() as UInteger
 
  declare sub Append overload (item as String)
@@ -32,6 +31,7 @@ type List
  declare sub Prepend overload (item as String)
  declare sub Prepend overload (item as Any ptr)
  declare sub Remove(index as UInteger)
+ declare sub RemoveItem(item as String)
 
 end type
 
@@ -48,9 +48,18 @@ function List.Merge(list1 as List, list2 as List) as List
 end function
 
 
-function List.Head() as String
+function List.Contains(item as String) as Boolean
 
- return ItemAt(1)
+ dim result as Boolean
+ 
+ for i as Integer = 1 to Length()
+  if ItemAt(i) = item then
+   result = true
+   exit for
+  end if
+ next
+ 
+ return result
 
 end function
 
@@ -107,13 +116,6 @@ function List.Slice(start as UInteger = 1, finish as UInteger = 0) as List
  end if
  
  return result
-
-end function
-
-
-function List.Tail() as List
-
- return Slice(2)
 
 end function
 
@@ -253,3 +255,20 @@ sub List.Remove(index as UInteger)
  end if
  
 end sub
+
+
+sub List.RemoveItem(item as String)
+
+ dim index as Integer = 1
+
+ do while index <= Length()
+  if ItemAt(index) = item then
+   Remove(index)
+  else
+   index += 1
+  end if
+ loop
+
+end sub
+
+

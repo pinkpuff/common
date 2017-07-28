@@ -1,126 +1,43 @@
-#include once "binarytree.bas"
+'#include once "binarytree.bas"
+#include once "sortedlist.bas"
 
 type Set
 
  private:
 
- contents as BinaryTree
+ 'elements as BinaryTree
+ 'elements as List
+ elements as SortedList
 
  public:
 
- declare static function Difference(s1 as Set, s2 as Set) as Set
- declare static function IntersectionOf(s1 as Set, s2 as Set) as Set
- declare static function Subset(small as Set, large as Set) as Boolean
- declare static function UnionOf(s1 as Set, s2 as Set) as Set
-
  declare function Contains(item as String) as Boolean
- declare function Enumeration() as List
- declare function IndexOf(item as String) as UInteger
+ declare function Contents() as List
  declare function IsEmpty() as Boolean
+ declare function IsSubsetOf(other as Set) as Boolean
+ declare function IsSupersetOf(other as Set) as Boolean
  declare function Size() as UInteger
 
  declare sub AddItem(item as String)
  declare sub Destroy()
+ declare sub IntersectWith(other as Set)
  declare sub Remove(item as String)
+ declare sub Subtract(other as Set)
+ declare sub UnionWith(other as Set)
 
 end type
 
 
-function Set.Difference(s1 as Set, s2 as Set) as Set
-
- dim result as Set
- dim e as List
-
- result = s1
- e = s2.Enumeration()
- for i as UInteger = 1 to e.Length()
-  result.Remove(e.ItemAt(i))
- next
-
- return result
-
-end function
-
-
-function Set.IntersectionOf(s1 as Set, s2 as Set) as Set
-
- dim result as Set
- dim e as List
-
- e = s2.Enumeration()
- for i as UInteger = 1 to e.Length()
-  if s1.Contains(e.ItemAt(i)) then result.AddItem(e.ItemAt(i))
- next
-
- return result
-
-end function
-
-
-function Set.Subset(small as Set, large as Set) as Boolean
-
- dim result as Boolean
- dim e as List
-
- result = true
- e = small.Enumeration()
- for i as UInteger = 1 to e.Length()
-  if not large.Contains(e.ItemAt(i)) then
-   result = false
-   exit for
-  end if
- next
-
- return result
-
-end function
-
-
-function Set.UnionOf(s1 as Set, s2 as Set) as Set
-
- dim result as Set
- dim e as List
-
- result = s1
- e = s2.Enumeration()
- for i as UInteger = 1 to e.Length()
-  result.AddItem(e.ItemAt(i))
- next
-
- return result
-
-end function
-
-
 function Set.Contains(item as String) as Boolean
 
- return contents.Lookup(item) = "T"
+ return elements.Contains(item)
 
 end function
 
 
-function Set.Enumeration() as List
+function Set.Contents() as List
 
- return contents.KeyList()
-
-end function
-
-
-function Set.IndexOf(item as String) as UInteger
-
- dim e as List
- dim result as UInteger
-
- e = Enumeration()
-
- for i as Integer = 1 to e.Length()
-  if e.ItemAt(i) = item then
-   result = i
-   exit for
-  end if
- next
-
- return result
+ return elements.ItemList()
 
 end function
 
@@ -132,33 +49,100 @@ function Set.IsEmpty() as Boolean
 end function
 
 
+function Set.IsSubsetOf(other as Set) as Boolean
+
+ dim result as Boolean = true
+ 
+ for i as Integer = 1 to Size()
+  if not other.Contains(elements.ItemAt(i)) then
+   result = false
+   exit for
+  end if
+ next
+ 
+ return result
+
+end function
+
+
+function Set.IsSupersetOf(other as Set) as Boolean
+
+ dim result as Boolean = true
+ dim c as List
+ 
+ c = other.Contents() 
+ for i as Integer = 1 to c.Length()
+  if not Contains(c.ItemAt(i)) then
+   result = false
+   exit for
+  end if
+ next
+ 
+ return result
+
+end function
+
+
 function Set.Size() as UInteger
 
- dim e as List
-
- e = Enumeration()
-
- return e.Length()
+ return elements.Length()
 
 end function
 
 
 sub Set.AddItem(item as String)
 
- contents.Insert(item, "T")
+ if not elements.Contains(item) then elements.AddItem(item)
 
 end sub
 
 
 sub Set.Destroy()
 
- contents.Destroy()
+ elements.Destroy()
+
+end sub
+
+
+sub Set.IntersectWith(other as Set)
+
+ dim newelements as SortedList
+ 
+ for i as Integer = 1 to Size()
+  if other.Contains(elements.ItemAt(i)) then newelements.AddItem(elements.ItemAt(i))
+ next
+ 
+ elements = newelements
 
 end sub
 
 
 sub Set.Remove(item as String)
 
- contents.Remove(item)
+ elements.RemoveItem(item)
+
+end sub
+
+
+sub Set.Subtract(other as Set)
+
+ dim c as List
+ 
+ c = other.Contents()
+ for i as Integer = 1 to c.Length()
+  Remove(c.ItemAt(i))
+ next
+
+end sub
+
+
+sub Set.UnionWith(other as Set)
+
+ dim c as List
+ 
+ c = other.Contents()
+ for i as Integer = 1 to c.Length()
+  AddItem(c.ItemAt(i))
+ next
 
 end sub
