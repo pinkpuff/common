@@ -15,10 +15,10 @@ function Tokenize(byval s as String, delimiters as String = " ") as List
  s = ltrim(s)
 
  for i as Integer = 1 to len(s)
-  if d.Contains(mid(s, i, 1)) then
+  if d.ContainsItem(mid(s, i, 1)) then
    if readmode then
     readmode = false
-    result.Append(token)
+    result.AddItem(token)
     token = ""
    end if
   else
@@ -26,7 +26,7 @@ function Tokenize(byval s as String, delimiters as String = " ") as List
    token += mid(s, i, 1)
   end if
  next
- if readmode then result.Append(token)
+ if readmode then result.AddItem(token)
  
  return result
 

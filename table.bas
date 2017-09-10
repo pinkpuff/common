@@ -4,30 +4,31 @@ type Table
 
  contents as List
 
- declare function Column(x as UInteger) as List
- declare function Height() as UInteger
- declare function ItemAt(x as UInteger, y as UInteger) as String
- declare function PointerAt(x as UInteger, y as UInteger) as Any ptr
- declare function Row(y as UInteger) as List
- declare function SubTable(x1 as UInteger, y1 as UInteger, x2 as UInteger, y2 as UInteger) as Table
- declare function Width() as UInteger
+ declare function Column(x as Integer) as List
+ declare function Height() as Integer
+ declare function ItemAt(x as Integer, y as Integer) as String
+ declare function PointerAt(x as Integer, y as Integer) as Any ptr
+ declare function ValueAt(x as Integer, y as Integer) as Integer
+ declare function Row(y as Integer) as List
+ declare function SubTable(x1 as Integer, y1 as Integer, x2 as Integer, y2 as Integer) as Table
+ declare function Width() as Integer
 
- declare sub Assign overload (x as UInteger, y as UInteger, item as String)
- declare sub Assign overload (x as UInteger, y as UInteger, item as Any ptr)
+ declare sub Assign overload (x as Integer, y as Integer, item as String)
+ declare sub Assign overload (x as Integer, y as Integer, item as Any ptr)
  declare sub Destroy()
- declare sub Remove(x as UInteger, y as UInteger)
+ declare sub Remove(x as Integer, y as Integer)
 
 end type
 
 
-function Table.Column(x as UInteger) as List
+function Table.Column(x as Integer) as List
 
  dim result as List
  dim l as List ptr
 
- for i as UInteger = 1 to Height()
+ for i as Integer = 1 to Height()
   l = contents.PointerAt(i)
-  result.Append(l->ItemAt(x))
+  result.AddItem(l->ItemAt(x))
  next
 
  return result
@@ -35,14 +36,14 @@ function Table.Column(x as UInteger) as List
 end function
 
 
-function Table.Height() as UInteger
+function Table.Height() as Integer
 
  return contents.Length()
 
 end function
 
 
-function Table.ItemAt(x as UInteger, y as UInteger) as String
+function Table.ItemAt(x as Integer, y as Integer) as String
 
  dim l as List ptr
 
@@ -53,18 +54,29 @@ function Table.ItemAt(x as UInteger, y as UInteger) as String
 end function
 
 
-function Table.PointerAt(x as UInteger, y as UInteger) as Any ptr
+function Table.PointerAt(x as Integer, y as Integer) as Any ptr
 
  dim l as List ptr
 
  l = contents.PointerAt(y)
 
- return StringToPointer(l->ItemAt(x))
+ return l->PointerAt(x)
 
 end function
 
 
-function Table.Row(y as UInteger) as List
+function Table.ValueAt(x as Integer, y as Integer) as Integer
+
+ dim l as List ptr
+ 
+ l = contents.PointerAt(y)
+ 
+ return l->ValueAt(x)
+
+end function
+
+
+function Table.Row(y as Integer) as List
 
  dim l as List ptr
 
@@ -75,13 +87,13 @@ function Table.Row(y as UInteger) as List
 end function
 
 
-function Table.SubTable(x1 as UInteger, y1 as UInteger, x2 as UInteger, y2 as UInteger) as Table
+function Table.SubTable(x1 as Integer, y1 as Integer, x2 as Integer, y2 as Integer) as Table
 
  dim t as Table
  dim l as List ptr
  dim temp as List ptr
 
- for i as UInteger = y1 to y2
+ for i as Integer = y1 to y2
   l = contents.PointerAt(i)
   temp = callocate(len(List))
   *temp = l->Slice(x1, x2)
@@ -93,9 +105,9 @@ function Table.SubTable(x1 as UInteger, y1 as UInteger, x2 as UInteger, y2 as UI
 end function
 
 
-function Table.Width() as UInteger
+function Table.Width() as Integer
 
- dim result as UInteger
+ dim result as Integer
  dim l as List ptr
  
  if contents.Length() = 0 then
@@ -110,12 +122,12 @@ function Table.Width() as UInteger
 end function
 
 
-sub Table.Assign(x as UInteger, y as UInteger, item as String)
+sub Table.AssignItem(x as Integer, y as Integer, item as String)
 
  dim l as List ptr
 
  if y > Height() then
-  for i as UInteger = Height() + 1 to y
+  for i as Integer = Height() + 1 to y
    l = callocate(SizeOf(List))
    l->Assign(Width(), "")
    contents.Append(l)
@@ -123,7 +135,7 @@ sub Table.Assign(x as UInteger, y as UInteger, item as String)
  end if
 
  if x > Width() then
-  for i as UInteger = 1 to Height()
+  for i as Integer = 1 to Height()
    l = contents.PointerAt(i)
    l->Assign(x, "")
   next
@@ -135,9 +147,16 @@ sub Table.Assign(x as UInteger, y as UInteger, item as String)
 end sub
 
 
-sub Table.Assign(x as UInteger, y as UInteger, item as Any ptr)
+sub Table.AssignPointer(x as Integer, y as Integer, item as Any ptr)
 
  Assign(x, y, PointerToString(item))
+
+end sub
+
+
+sub Table.AssignValue(x as Integer, y as Integer, item as Integer)
+
+ Assign(x, y, str(item))
 
 end sub
 
@@ -146,7 +165,7 @@ sub Table.Destroy()
 
  dim l as List ptr
 
- for i as UInteger = 1 to Height()
+ for i as Integer = 1 to Height()
   l = contents.PointerAt(i)
   l->Destroy()
  next
@@ -156,7 +175,7 @@ sub Table.Destroy()
 end sub
 
 
-sub Table.Remove(x as UInteger, y as UInteger)
+sub Table.Remove(x as Integer, y as Integer)
 
  dim l as List ptr
 

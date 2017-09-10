@@ -34,19 +34,13 @@ end function
 
 sub Spinner.AddSide(label as String)
 
- sides.Append(label)
+ sides.AddItem(label)
  
 end sub
 
 
 sub Spinner.RemoveSide(label as String)
 
- dim temp as List
- 
- for i as Integer = 1 to sides.Length()
-  if sides.ItemAt(i) <> label then temp.Append(sides.ItemAt(i))
- next
- 
- sides = temp
+ sides.RemoveItem(label)
 
 end sub

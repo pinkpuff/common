@@ -25,7 +25,7 @@ function Deck.Draw() as String
  dim result as String
 
  result = cards.ItemAt(1)
- cards.Remove(1)
+ cards.RemoveIndex(1)
 
  return result
 
@@ -60,7 +60,7 @@ end function
 
 sub Deck.AddCard(label as String)
 
- cards.Append(label)
+ cards.AddItem(label)
 
 end sub
 

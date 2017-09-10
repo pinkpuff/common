@@ -1,65 +1,101 @@
-#include once "functions/pointerstringconversion.bas"
+'When storing pointers in the list, removing or replacing a pointer will
+' deallocate the pointer you removed or replaced.
+
+#include once "functions\pointerstringconversion.bas"
 
 type List
 
  private:
  
  contents as String ptr
- items as UInteger
+ items as Integer
  
  public:
  
- declare static function Merge(list1 as List, list2 as List) as List
- 
- declare function Contains(item as String) as Boolean
+ declare function ContainsItem(item as String) as Boolean
+ declare function ContainsPointer(item as Any ptr) as Boolean
+ declare function ContainsValue(item as Integer) as Boolean
+ declare function IndexOfItem(item as String) as Integer
+ declare function IndexOfPointer(item as Any ptr) as Integer
+ declare function IndexOfValue(item as Integer) as Integer
  declare function IsEmpty() as Boolean
- declare function ItemAt(index as UInteger) as String
- declare function Length() as UInteger
- declare function PointerAt(index as UInteger) as Any ptr
- declare function Slice(start as UInteger = 1, finish as UInteger = 0) as List
- declare function Width() as UInteger
+ declare function ItemAt(index as Integer) as String
+ declare function Length() as Integer
+ declare function PointerAt(index as Integer) as Any ptr
+ declare function Slice(start as Integer = 1, finish as Integer = 0) as List
+ declare function ValueAt(index as Integer) as Integer
+ declare function Width() as Integer
 
- declare sub Append overload (item as String)
- declare sub Append overload (item as Any ptr)
- declare sub Assign overload (index as UInteger, item as String)
- declare sub Assign overload (index as UInteger, item as Any ptr)
+ declare sub AddItem(item as String)
+ declare sub AddPointer(item as Any ptr)
+ declare sub AddValue(item as Integer)
+ declare sub AssignItem(index as Integer, item as String)
+ declare sub AssignPointer(index as Integer, item as Any ptr)
+ declare sub AssignValue(index as Integer, item as Integer)
  declare sub Destroy()
- declare sub Exchange(index1 as UInteger, index2 as UInteger)
- declare sub Insert overload (index as UInteger, item as String)
- declare sub Insert overload (index as UInteger, item as Any ptr)
+ declare sub Exchange(index1 as Integer, index2 as Integer)
+ declare sub InsertItem(index as Integer, item as String)
+ declare sub InsertPointer(index as Integer, item as Any ptr)
+ declare sub InsertValue(index as Integer, item as Integer)
  declare sub Join(l as List)
- declare sub Prepend overload (item as String)
- declare sub Prepend overload (item as Any ptr)
- declare sub Remove(index as UInteger)
+ declare sub PrependItem(item as String)
+ declare sub PrependPointer(item as Any ptr)
+ declare sub PrependValue(item as Integer)
+ declare sub RemoveIndex(index as Integer)
  declare sub RemoveItem(item as String)
+ declare sub RemovePointer(item as Any ptr)
+ declare sub RemoveValue(item as Integer)
 
 end type
 
 
-function List.Merge(list1 as List, list2 as List) as List
+function List.ContainsItem(item as String) as Boolean
 
- dim result as List
+ return IndexOfItem(item) > 0
+
+end function
+
+
+function List.ContainsPointer(item as Any ptr) as Boolean
+
+ return ContainsItem(PointerToString(item))
+
+end function
+
+
+function List.ContainsValue(item as Integer) as Boolean
+
+ return ContainsItem(str(item))
+
+end function
+
+
+function List.IndexOfItem(item as String) as Integer
+
+ dim result as Integer
  
- result = list1
- result.Join(list2)
+ for i as Integer = 1 to Length()
+  if ItemAt(i) = item then
+   result = i
+   exit for
+  end if
+ next
  
  return result
 
 end function
 
 
-function List.Contains(item as String) as Boolean
+function List.IndexOfPointer(item as Any ptr) as Integer
 
- dim result as Boolean
- 
- for i as Integer = 1 to Length()
-  if ItemAt(i) = item then
-   result = true
-   exit for
-  end if
- next
- 
- return result
+ return IndexOfItem(PointerToString(item))
+
+end function
+
+
+function List.IndexOfValue(item as Integer) as Integer
+
+ return IndexOfItem(str(item))
 
 end function
 
@@ -71,7 +107,7 @@ function List.IsEmpty() as Boolean
 end function
 
 
-function List.ItemAt(index as UInteger) as String
+function List.ItemAt(index as Integer) as String
 
  dim result as String = ""
  
@@ -82,25 +118,25 @@ function List.ItemAt(index as UInteger) as String
 end function
 
 
-function List.Length() as UInteger
+function List.Length() as Integer
 
  return items
 
 end function
 
 
-function List.PointerAt(index as UInteger) as Any ptr
+function List.PointerAt(index as Integer) as Any ptr
 
  dim result as Any ptr
 
- if index <= Length() then result = StringToPointer(ItemAt(index))
+ if index > 0 and index <= Length() then result = StringToPointer(ItemAt(index))
 
  return result
 
 end function
 
 
-function List.Slice(start as UInteger = 1, finish as UInteger = 0) as List
+function List.Slice(start as Integer = 1, finish as Integer = 0) as List
 
  dim result as List
  
@@ -110,7 +146,7 @@ function List.Slice(start as UInteger = 1, finish as UInteger = 0) as List
   if start <= items then
    if finish > items then finish = items
    for i as Integer = start to finish
-    result.Append(ItemAt(i))
+    result.AddItem(ItemAt(i))
    next
   end if
  end if
@@ -120,14 +156,21 @@ function List.Slice(start as UInteger = 1, finish as UInteger = 0) as List
 end function
 
 
-function List.Width() as UInteger
+function List.ValueAt(index as Integer) as Integer
 
- dim result as UInteger
- dim temp as String
+ return val(ItemAt(index))
+
+end function
+
+
+function List.Width() as Integer
+
+ dim result as Integer
+ dim temp as Integer
  
  for i as Integer = 1 to items
-  temp = ItemAt(i)
-  if len(temp) > result then result = len(temp)
+  temp = len(ItemAt(i))
+  if temp > result then result = temp
  next
  
  return result
@@ -135,7 +178,7 @@ function List.Width() as UInteger
 end function
 
 
-sub List.Append(item as String)
+sub List.AddItem(item as String)
 
  if items > 0 then
   items += 1
@@ -151,21 +194,28 @@ sub List.Append(item as String)
 end sub
 
 
-sub List.Append(item as Any ptr)
+sub List.AddPointer(item as Any ptr)
 
- Append(PointerToString(item))
+ AddItem(PointerToString(item))
 
 end sub
 
 
-sub List.Assign(index as UInteger, item as String)
+sub List.AddValue(item as Integer)
+
+ AddItem(str(item))
+
+end sub
+
+
+sub List.AssignItem(index as Integer, item as String)
 
  if index > 0 then
   if index > items then
    for i as Integer = items + 1 to index - 1
-    Append("")
+    AddItem("")
    next
-   Append(item)
+   AddItem(item)
   else
    contents[index - 1] = item
   end if
@@ -174,9 +224,20 @@ sub List.Assign(index as UInteger, item as String)
 end sub
 
 
-sub List.Assign(index as UInteger, item as Any ptr)
+sub List.AssignPointer(index as Integer, item as Any ptr)
+ 
+ dim p as Any ptr
+ 
+ p = PointerAt(index)
+ if p <> 0 and p <> item then deallocate(p)
+ AssignItem(index, PointerToString(item))
 
- Assign(index, PointerToString(item))
+end sub
+
+
+sub List.AssignValue(index as Integer, item as Integer)
+
+ AssignItem(index, str(item))
 
 end sub
 
@@ -195,27 +256,38 @@ sub List.Destroy()
 end sub
 
 
-sub List.Exchange(index1 as UInteger, index2 as UInteger)
+sub List.Exchange(index1 as Integer, index2 as Integer)
 
- swap contents[index1 - 1], contents[index2 - 1]
-
-end sub
-
-
-sub List.Insert(index as UInteger, item as String)
-
- Append(ItemAt(items))
- for i as Integer = items - 1 to index + 1 step - 1
-  Assign(i, ItemAt(i - 1))
- next
- Assign(index, item)
+ if index1 > 0 and index1 <= items and index2 > 0 and index2 <= items then
+  swap contents[index1 - 1], contents[index2 - 1]
+ end if
 
 end sub
 
 
-sub List.Insert(index as UInteger, item as Any ptr)
+sub List.InsertItem(index as Integer, item as String)
 
- Insert(index, PointerToString(item))
+ if index > 0 and index <= items then
+  AddItem(ItemAt(items))
+  for i as Integer = items - 1 to index + 1 step - 1
+   AssignItem(i, ItemAt(i - 1))
+  next
+  AssignItem(index, item)
+ end if
+
+end sub
+
+
+sub List.InsertPointer(index as Integer, item as Any ptr)
+
+ InsertItem(index, PointerToString(item))
+
+end sub
+
+
+sub List.InsertValue(index as Integer, item as Integer)
+
+ InsertItem(index, str(item))
 
 end sub
 
@@ -223,27 +295,34 @@ end sub
 sub List.Join(l as List)
 
  for i as Integer = 1 to l.Length()
-  Append(l.ItemAt(i))
+  AddItem(l.ItemAt(i))
  next
 
 end sub
 
 
-sub List.Prepend(item as String)
+sub List.PrependItem(item as String)
 
- Insert(1, item)
+ InsertItem(1, item)
 
 end sub
 
 
-sub List.Prepend(item as Any ptr)
+sub List.PrependPointer(item as Any ptr)
 
- Insert(1, item)
+ InsertPointer(1, item)
  
 end sub
 
 
-sub List.Remove(index as UInteger)
+sub List.PrependValue(item as Integer)
+
+ InsertValue(1, item)
+
+end sub
+
+
+sub List.RemoveIndex(index as Integer)
 
  if items > 0 and index <= items then
   items -= 1
@@ -263,7 +342,7 @@ sub List.RemoveItem(item as String)
 
  do while index <= Length()
   if ItemAt(index) = item then
-   Remove(index)
+   RemoveIndex(index)
   else
    index += 1
   end if
@@ -272,3 +351,32 @@ sub List.RemoveItem(item as String)
 end sub
 
 
+sub List.RemovePointer(item as Any ptr)
+
+ dim index as Integer = 1
+
+ do while index <= Length()
+  if PointerAt(index) = item then
+   RemoveIndex(index)
+  else
+   index += 1
+  end if
+ loop
+ deallocate(item)
+
+end sub
+
+
+sub List.RemoveValue(item as Integer)
+
+ dim index as Integer = 1
+
+ do while index <= Length()
+  if ValueAt(index) = item then
+   RemoveIndex(index)
+  else
+   index += 1
+  end if
+ loop
+
+end sub
