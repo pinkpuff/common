@@ -1,4 +1,3 @@
-'Test
 #include once "functions/roll.bas"
 
 type Deck
