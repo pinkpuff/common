@@ -1,7 +1,7 @@
-#include "../list.bas"
-#include "../keycodes.bas"
-#include "../functions/minmax.bas"
-#include "../functions/roundup.bas"
+#include once "../list.bas"
+#include once "../keycodes.bas"
+#include once "../functions/minmax.bas"
+#include once "../functions/roundup.bas"
 
 type Menu
 
