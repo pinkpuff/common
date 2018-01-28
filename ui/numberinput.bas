@@ -8,20 +8,22 @@ type NumberInput
  
  x as Integer
  y as Integer
+ cancel as Boolean
  value as Integer
  min_value as Integer
  max_value as Integer
  text_color as Byte
  highlight_color as Byte
  highlighted as Boolean
- cancel as Boolean
  
  public:
  
  declare constructor(starting_x as Integer = 1, starting_y as Integer = 1, starting_value as Integer = 1, starting_min_value as Integer = 0, starting_max_value as Integer = 255)
  declare function Cancelled() as Boolean
  declare function CurrentValue() as Integer
- declare function HandleKey() as Boolean
+ declare function HandleKey(key as Long = 0) as Boolean
+ declare sub ChangeMax(new_max as Integer)
+ declare sub ChangeMin(new_min as Integer)
  declare sub ChangeValue(new_value as Integer)
  declare sub Display()
  declare sub Highlight()
@@ -59,13 +61,12 @@ function NumberInput.CurrentValue() as Integer
 end function
 
 
-function NumberInput.HandleKey() as Boolean
+function NumberInput.HandleKey(key as Long = 0) as Boolean
 
  dim done as Boolean
- dim key as UInteger
 
  value = Max(min_value, Min(max_value, value)) 
- key = getkey
+ if key = 0 then key = getkey
  select case key
  case ESC_KEY
   done = true
@@ -94,6 +95,22 @@ function NumberInput.HandleKey() as Boolean
  return done
 
 end function
+
+
+sub NumberInput.ChangeMax(new_max as Integer)
+
+ max_value = new_max
+ value = Min(value, max_value)
+
+end sub
+
+
+sub NumberInput.ChangeMin(new_min as Integer)
+
+ min_value = new_min
+ value = Max(value, min_value)
+
+end sub
 
 
 sub NumberInput.ChangeValue(new_value as Integer)

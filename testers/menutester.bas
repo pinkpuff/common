@@ -9,7 +9,7 @@ m.AddOption("Four")
 m.AddOption("Five")
 m.AddOption("Six")
 cls
-m.UserSelect()
+m.UserInput()
 if m.Cancelled() then
  print "--Cancelled"
 else

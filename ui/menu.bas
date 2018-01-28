@@ -1,5 +1,5 @@
-#include once "../list.bas"
 #include once "../keycodes.bas"
+#include once "../list.bas"
 #include once "../functions/minmax.bas"
 #include once "../functions/roundup.bas"
 
@@ -7,22 +7,22 @@ type Menu
 
  private:
  
- options as List
  x as Integer
  y as Integer
+ cancel as Boolean
+ options as List
  columns as Integer
  selected as Integer
  window_height as Integer
  window_top as Integer
  text_color as Byte
  highlight_color as Byte
- cancel as Boolean
  
  public:
 
  declare constructor(starting_x as Integer = 1, starting_y as Integer = 1, starting_columns as Integer = 1, starting_selected as Integer = 1, starting_window_height as Integer = 0)
  declare function Cancelled() as Boolean
- declare function HandleKey() as Boolean
+ declare function HandleKey(key as Long = 0) as Boolean
  declare function SelectedIndex() as Integer
  declare function SelectedItem() as String
  declare sub AddOption(new_option as String)
@@ -31,7 +31,7 @@ type Menu
  declare sub SelectIndex(new_index as Integer)
  declare sub SelectItem(new_item as String)
  declare sub SetOptions(l as List)
- declare sub UserSelect()
+ declare sub UserInput()
  
 end type
 
@@ -58,11 +58,12 @@ function Menu.Cancelled() as Boolean
 end function
 
 
-function Menu.HandleKey() as Boolean
+function Menu.HandleKey(key as Long = 0) as Boolean
 
  dim done as Boolean
  
- select case getkey
+ if key = 0 then key = getkey
+ select case key
  case ESC_KEY
   cancel = true
   done = true
@@ -181,7 +182,7 @@ sub Menu.SetOptions(l as List)
 end sub
 
 
-sub Menu.UserSelect()
+sub Menu.UserInput()
 
  cancel = false
  do
