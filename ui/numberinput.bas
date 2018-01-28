@@ -149,6 +149,7 @@ end sub
 
 sub NumberInput.UserInput()
 
+ cancel = false
  do
   Display()
  loop until HandleKey()

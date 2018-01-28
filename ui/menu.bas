@@ -78,7 +78,7 @@ function Menu.HandleKey(key as Long = 0) as Boolean
  case DOWN_KEY
   if (selected + columns) <= options.Length() then
    selected += columns
-   if selected > (window_top + window_height - 1) * columns then
+   if selected > (window_top + iif(window_height = 0, RoundUp(options.Length() / columns), window_height) - 1) * columns then
     window_top += 1
    end if
   end if
