@@ -1,7 +1,7 @@
 #include "../list.bas"
 #include "../keycodes.bas"
 #include "../functions/minmax.bas"
-#include "../functions/pad.bas"
+#include "../functions/roundup.bas"
 
 type Menu
 
@@ -20,25 +20,30 @@ type Menu
  
  public:
 
- declare constructor(starting_x as Integer = 1, starting_y as Integer = 1, starting_columns as Integer = 1, starting_selected as Integer = 1, starting_window_height as Integer = 0, starting_window_top as Integer = 0)
+ declare constructor(starting_x as Integer = 1, starting_y as Integer = 1, starting_columns as Integer = 1, starting_selected as Integer = 1, starting_window_height as Integer = 0)
  declare function Cancelled() as Boolean
  declare function HandleKey() as Boolean
+ declare function SelectedIndex() as Integer
+ declare function SelectedItem() as String
  declare sub AddOption(new_option as String)
+ declare sub ChangeOption(index as Integer = 0, new_option as String)
  declare sub Display()
+ declare sub SelectIndex(new_index as Integer)
+ declare sub SelectItem(new_item as String)
  declare sub SetOptions(l as List)
  declare sub UserSelect()
  
 end type
 
 
-constructor Menu(starting_x as Integer = 1, starting_y as Integer = 1, starting_columns as Integer = 1, starting_selected as Integer = 1, starting_window_height as Integer = 0, starting_window_top as Integer = 0)
+constructor Menu(starting_x as Integer = 1, starting_y as Integer = 1, starting_columns as Integer = 1, starting_selected as Integer = 1, starting_window_height as Integer = 0)
 
  x = starting_x
  y = starting_y
  columns = starting_columns
  selected = starting_selected
  window_height = starting_window_height
- window_top = starting_window_top
+ window_top = 1
  text_color = 7
  highlight_color = 0
  cancel = false
@@ -65,9 +70,17 @@ function Menu.HandleKey() as Boolean
   cancel = false
   done = true
  case UP_KEY
-  if (selected - columns) >= 1 then selected -= columns
+  if (selected - columns) >= 1 then
+   selected -= columns
+   if selected <= (window_top - 1) * columns then window_top -= 1
+  end if
  case DOWN_KEY
-  if (selected + columns) <= options.Length() then selected += columns
+  if (selected + columns) <= options.Length() then
+   selected += columns
+   if selected > (window_top + window_height - 1) * columns then
+    window_top += 1
+   end if
+  end if
  case RIGHT_KEY
   if selected mod columns > 0 and selected < options.Length() then selected += 1
  case LEFT_KEY
@@ -83,6 +96,20 @@ function Menu.HandleKey() as Boolean
 end function
 
 
+function Menu.SelectedIndex() as Integer
+
+ return selected
+
+end function
+
+
+function Menu.SelectedItem() as String
+
+ return options.ItemAt(selected)
+ 
+end function
+
+
 sub Menu.AddOption(new_option as String)
 
  options.AddItem(new_option)
@@ -90,24 +117,60 @@ sub Menu.AddOption(new_option as String)
 end sub
 
 
+sub Menu.ChangeOption(index as Integer = 0, new_option as String)
+
+ if index = 0 then index = selected
+ if index > 0 and index < options.Length() then
+  options.AssignItem(index, new_option)
+ end if
+
+end sub
+
+
 sub Menu.Display()
 
+ dim lines as Integer
+ dim index as Integer
+ 
  y = Max(y, 1)
  x = Max(x, 1)
  selected = Max(Min(selected, options.Length()), 1)
-
- locate y, x, 0
- for i as Integer = 1 to options.Length()
-  if i = selected then
-   color highlight_color, text_color
-  else
-   color text_color, highlight_color
-  end if
-  print Pad(options.ItemAt(i), options.Width() + 2);
-  if i mod columns = 0 or i = options.Length() then print
- next
- color text_color, highlight_color
+ lines = iif(window_height = 0, RoundUp(options.Length() / columns), window_height)
  
+ locate ,, 0
+ for i as Integer = 1 to lines
+  for j as Integer = 1 to columns
+   index = (window_top + i - 2) * columns + j
+   if index = selected then
+    color highlight_color, text_color
+   else
+    color text_color, highlight_color
+   end if
+   locate y + i - 1, x + (j - 1) * (options.Width() + 2)
+   print options.ItemAt(index);
+   color text_color, highlight_color
+   print space(options.Width() - len(options.ItemAt(index)));
+  next
+ next
+ locate y + lines, x
+ 
+end sub
+
+
+sub Menu.SelectIndex(new_index as Integer)
+
+ selected = Max(Min(new_index, options.Length()), 1)
+
+end sub
+
+
+sub Menu.SelectItem(new_item as String)
+
+ dim result as Integer
+ 
+ result = options.IndexOfItem(new_item)
+ if result > 0 then selected = result
+
 end sub
 
 
@@ -120,6 +183,7 @@ end sub
 
 sub Menu.UserSelect()
 
+ cancel = false
  do
   Display()
  loop until HandleKey()
