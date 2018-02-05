@@ -18,10 +18,13 @@ type List
  declare function IndexOfItem(item as String) as Integer
  declare function IndexOfPointer(item as Any ptr) as Integer
  declare function IndexOfValue(item as Integer) as Integer
- declare function IsEmpty() as Boolean
+ declare function Empty() as Boolean
  declare function ItemAt(index as Integer) as String
  declare function Length() as Integer
  declare function PointerAt(index as Integer) as Any ptr
+ declare function SameItems(candidate as List) as Boolean
+ declare function SamePointers(candidate as List) as Boolean
+ declare function SameValues(candidate as List) as Boolean
  declare function Slice(start as Integer = 1, finish as Integer = 0) as List
  declare function ValueAt(index as Integer) as Integer
  declare function Width() as Integer
@@ -100,7 +103,7 @@ function List.IndexOfValue(item as Integer) as Integer
 end function
 
 
-function List.IsEmpty() as Boolean
+function List.Empty() as Boolean
 
  return (items = 0)
  
@@ -132,6 +135,81 @@ function List.PointerAt(index as Integer) as Any ptr
  if index > 0 and index <= Length() then result = StringToPointer(ItemAt(index))
 
  return result
+
+end function
+
+
+function List.SameItems(candidate as List) as Boolean
+
+ dim same as Boolean = true
+ 
+ for i as Integer = 1 to Length()
+  if not candidate.ContainsItem(ItemAt(i)) then
+   same = false
+   exit for
+  end if
+ next
+ 
+ if same then
+  for i as Integer = 1 to candidate.Length()
+   if not ContainsItem(candidate.ItemAt(i)) then
+    same = false
+    exit for
+   end if
+  next
+ end if
+ 
+ return same
+
+end function
+
+
+function List.SamePointers(candidate as List) as Boolean
+
+ dim same as Boolean = true
+ 
+ for i as Integer = 1 to Length()
+  if not candidate.ContainsPointer(PointerAt(i)) then
+   same = false
+   exit for
+  end if
+ next
+ 
+ if same then
+  for i as Integer = 1 to candidate.Length()
+   if not ContainsPointer(candidate.PointerAt(i)) then
+    same = false
+    exit for
+   end if
+  next
+ end if
+ 
+ return same
+
+end function
+
+
+function List.SameValues(candidate as List) as Boolean
+
+ dim same as Boolean = true
+ 
+ for i as Integer = 1 to Length()
+  if not candidate.ContainsValue(ValueAt(i)) then
+   same = false
+   exit for
+  end if
+ next
+ 
+ if same then
+  for i as Integer = 1 to candidate.Length()
+   if not ContainsValue(candidate.ValueAt(i)) then
+    same = false
+    exit for
+   end if
+  next
+ end if
+ 
+ return same
 
 end function
 

@@ -13,7 +13,7 @@ type SortedList
  declare function IndexOfItem(item as String) as Integer
  declare function IndexOfPointer(item as Any ptr) as Integer
  declare function IndexOfValue(item as Integer) as Integer
- declare function IsEmpty() as Boolean
+ declare function Empty() as Boolean
  declare function ItemList() as List
  declare function ItemAt(index as Integer) as String
  declare function Length() as Integer
@@ -106,9 +106,9 @@ function SortedList.IndexOfValue(item as Integer) as Integer
 end function
 
 
-function SortedList.IsEmpty() as Boolean
+function SortedList.Empty() as Boolean
 
- return contents.IsEmpty()
+ return contents.Empty()
 
 end function
 
@@ -208,7 +208,7 @@ sub SortedList.AddItem(item as String)
 
  dim index as Integer
  
- if contents.IsEmpty() then
+ if contents.Empty() then
   contents.AddItem(item)
  else
   index = FindIndex(item, contents)

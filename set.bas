@@ -12,14 +12,18 @@ type Set
  declare function ContainsPointer(item as Any ptr) as Boolean
  declare function ContainsValue(item as Integer) as Boolean
  declare function Contents() as List
- declare function IsEmpty() as Boolean
- declare function IsSubsetOf(other as Set) as Boolean
- declare function IsSupersetOf(other as Set) as Boolean
+ declare function Empty() as Boolean
+ declare function SameAs(other as Set) as Boolean
  declare function Size() as UInteger
+ declare function SubsetOf(other as Set) as Boolean
+ declare function SupersetOf(other as Set) as Boolean
 
  declare sub AddItem(item as String)
+ declare sub AddItems(items as List)
  declare sub AddPointer(item as Any ptr)
+ declare sub AddPointers(items as List)
  declare sub AddValue(item as Integer)
+ declare sub AddValues(items as List)
  declare sub Destroy()
  declare sub IntersectWith(other as Set)
  declare sub RemoveItem(item as String)
@@ -59,14 +63,28 @@ function Set.Contents() as List
 end function
 
 
-function Set.IsEmpty() as Boolean
+function Set.Empty() as Boolean
 
  return Size() = 0
 
 end function
 
 
-function Set.IsSubsetOf(other as Set) as Boolean
+function Set.SameAs(other as Set) as Boolean
+
+ return SupersetOf(other) and SubsetOf(other)
+
+end function
+
+
+function Set.Size() as UInteger
+
+ return elements.Length()
+
+end function
+
+
+function Set.SubsetOf(other as Set) as Boolean
 
  dim result as Boolean = true
  
@@ -82,7 +100,7 @@ function Set.IsSubsetOf(other as Set) as Boolean
 end function
 
 
-function Set.IsSupersetOf(other as Set) as Boolean
+function Set.SupersetOf(other as Set) as Boolean
 
  dim result as Boolean = true
  dim c as List
@@ -100,16 +118,18 @@ function Set.IsSupersetOf(other as Set) as Boolean
 end function
 
 
-function Set.Size() as UInteger
-
- return elements.Length()
-
-end function
-
-
 sub Set.AddItem(item as String)
 
  if not elements.ContainsItem(item) then elements.AddItem(item)
+
+end sub
+
+
+sub Set.AddItems(items as List)
+
+ for i as Integer = 1 to items.Length()
+  AddItem(items.ItemAt(i))
+ next
 
 end sub
 
@@ -121,10 +141,28 @@ sub Set.AddPointer(item as Any ptr)
 end sub
 
 
+sub Set.AddPointers(items as List)
+
+ for i as Integer = 1 to items.Length()
+  AddPointer(items.PointerAt(i))
+ next
+
+end sub
+
+
 sub Set.AddValue(item as Integer)
 
  if not elements.ContainsValue(item) then elements.AddValue(item)
  
+end sub
+
+
+sub Set.AddValues(items as List)
+
+ for i as Integer = 1 to items.Length()
+  AddValue(items.ValueAt(i))
+ next
+
 end sub
 
 
