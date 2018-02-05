@@ -1,5 +1,5 @@
 'When storing pointers in the list, removing or replacing a pointer will
-' deallocate the pointer you removed or replaced.
+'NOT deallocate the pointer you removed or replaced.
 
 #include once "functions\pointerstringconversion.bas"
 
@@ -307,7 +307,6 @@ sub List.AssignPointer(index as Integer, item as Any ptr)
  dim p as Any ptr
  
  p = PointerAt(index)
- if p <> 0 and p <> item then deallocate(p)
  AssignItem(index, PointerToString(item))
 
 end sub
@@ -440,7 +439,6 @@ sub List.RemovePointer(item as Any ptr)
    index += 1
   end if
  loop
- deallocate(item)
 
 end sub
 

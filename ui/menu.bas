@@ -28,6 +28,8 @@ type Menu
  declare sub AddOption(new_option as String)
  declare sub ChangeOption(index as Integer = 0, new_option as String)
  declare sub Display()
+ declare sub Erase()
+ declare sub ResetOptions()
  declare sub SelectIndex(new_index as Integer)
  declare sub SelectItem(new_item as String)
  declare sub SetOptions(l as List)
@@ -40,7 +42,7 @@ constructor Menu(starting_x as Integer = 1, starting_y as Integer = 1, starting_
 
  x = starting_x
  y = starting_y
- columns = starting_columns
+ columns = Max(starting_columns, 1)
  selected = starting_selected
  window_height = starting_window_height
  window_top = 1
@@ -155,6 +157,26 @@ sub Menu.Display()
  next
  locate y + lines, x
  
+end sub
+
+
+sub Menu.Erase()
+
+ dim lines as Integer
+ 
+ lines = iif(window_height = 0, RoundUp(options.Length() / columns), window_height)
+ for i as Integer = 1 to lines
+  locate y + i - 1, x
+  print space(options.Width() * columns + 2 * (columns - 1));
+ next
+
+end sub
+
+
+sub Menu.ResetOptions()
+
+ options.Destroy()
+
 end sub
 
 
