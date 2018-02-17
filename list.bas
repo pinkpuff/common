@@ -1,458 +1,334 @@
-'When storing pointers in the list, removing or replacing a pointer will
-'NOT deallocate the pointer you removed or replaced.
-
-#include once "functions\pointerstringconversion.bas"
+#include once "functions/pointerstringconversion.bas"
+#include once "functions/minmax.bas"
 
 type List
-
  private:
- 
- contents as String ptr
- items as Integer
- 
+  contents(any) as String 
  public:
- 
- declare function ContainsItem(item as String) as Boolean
- declare function ContainsPointer(item as Any ptr) as Boolean
- declare function ContainsValue(item as Integer) as Boolean
- declare function IndexOfItem(item as String) as Integer
- declare function IndexOfPointer(item as Any ptr) as Integer
- declare function IndexOfValue(item as Integer) as Integer
- declare function Empty() as Boolean
- declare function ItemAt(index as Integer) as String
- declare function Length() as Integer
- declare function PointerAt(index as Integer) as Any ptr
- declare function SameItems(candidate as List) as Boolean
- declare function SamePointers(candidate as List) as Boolean
- declare function SameValues(candidate as List) as Boolean
- declare function Slice(start as Integer = 1, finish as Integer = 0) as List
- declare function ValueAt(index as Integer) as Integer
- declare function Width() as Integer
-
- declare sub AddItem(item as String)
- declare sub AddPointer(item as Any ptr)
- declare sub AddValue(item as Integer)
- declare sub AssignItem(index as Integer, item as String)
- declare sub AssignPointer(index as Integer, item as Any ptr)
- declare sub AssignValue(index as Integer, item as Integer)
- declare sub Destroy()
- declare sub Exchange(index1 as Integer, index2 as Integer)
- declare sub InsertItem(index as Integer, item as String)
- declare sub InsertPointer(index as Integer, item as Any ptr)
- declare sub InsertValue(index as Integer, item as Integer)
- declare sub Join(l as List)
- declare sub PrependItem(item as String)
- declare sub PrependPointer(item as Any ptr)
- declare sub PrependValue(item as Integer)
- declare sub RemoveIndex(index as Integer)
- declare sub RemoveItem(item as String)
- declare sub RemovePointer(item as Any ptr)
- declare sub RemoveValue(item as Integer)
-
+  declare constructor()
+  declare operator +=(rhs as List)
+  declare operator +=(rhs as String)
+  declare operator +=(rhs as Long)
+  declare operator +=(rhs as Any ptr)
+  declare operator -=(rhs as List)
+  declare operator -=(rhs as String)
+  declare operator -=(rhs as Long)
+  declare operator -=(rhs as Any ptr)
+  declare operator cast() as String
+  declare function ContainsItem(item as String) as Boolean
+  declare function ContainsPointer(item as Any ptr) as Boolean
+  declare function ContainsValue(item as Long) as Boolean
+  declare function Empty() as Boolean
+  declare function IndexOfItem(item as String) as Long
+  declare function IndexOfPointer(item as Any ptr) as Long
+  declare function IndexOfValue(item as Long) as Long
+  declare function ItemAt(index as Long) as String
+  declare function PointerAt(index as Long) as Any ptr
+  declare function Size() as Long
+  declare function Slice(start as Long = 1, finish as Long = 0) as List
+  declare function ValueAt(index as Long) as Long
+  declare function Width() as Long
+  declare sub AddItem(item as String)
+  declare sub AddPointer(item as Any ptr)
+  declare sub AddValue(item as Long)
+  declare sub AssignItem(index as Long, item as String)
+  declare sub AssignPointer(index as Long, item as Any ptr)
+  declare sub AssignValue(index as Long, item as Long)
+  declare sub Destroy()
+  declare sub Fill(last_index as Long)
+  declare sub FillWithItem(last_index as Long, item as String)
+  declare sub FillWithPointer(last_index as Long, item as Any ptr)
+  declare sub FillWithValue(last_index as Long, item as Long)
+  declare sub InsertItem(index as Long, item as String)
+  declare sub InsertPointer(index as Long, item as Any ptr)
+  declare sub InsertValue(index as Long, item as Long)
+  declare sub RemoveIndex(index as Long)
+  declare sub RemoveItem(item as String)
+  declare sub RemovePointer(item as Any ptr)
+  declare sub RemoveValue(item as Long)
 end type
 
+declare operator +(lhs as List, rhs as List) as List
+declare operator +(lhs as List, rhs as String) as List
+declare operator +(lhs as List, rhs as Long) as List
+declare operator +(lhs as List, rhs as Any ptr) as List
+declare operator +(lhs as String, rhs as List) as List
+declare operator +(lhs as Long, rhs as List) as List
+declare operator +(lhs as Any ptr, rhs as List) as List
+declare operator -(lhs as List, rhs as List) as List
+declare operator -(lhs as List, rhs as String) as List
+declare operator -(lhs as List, rhs as Long) as List
+declare operator -(lhs as List, rhs as Any ptr) as List
+
+operator +(lhs as List, rhs as List) as List
+ dim result as List
+ result += lhs
+ result += rhs
+ return result
+end operator
+
+operator +(lhs as List, rhs as String) as List
+ dim result as List
+ result += lhs
+ result += rhs
+ return result
+end operator
+
+operator +(lhs as List, rhs as Long) as List
+ dim result as List
+ result += lhs
+ result += rhs
+ return result
+end operator
+
+operator +(lhs as List, rhs as Any ptr) as List
+ dim result as List
+ result += lhs
+ result += rhs
+ return result
+end operator
+
+operator +(lhs as String, rhs as List) as List
+ dim result as List
+ result += lhs
+ result += rhs
+ return result
+end operator
+
+operator +(lhs as Long, rhs as List) as List
+ dim result as List
+ result += lhs
+ result += rhs
+ return result
+end operator
+
+operator +(lhs as Any ptr, rhs as List) as List
+ dim result as List
+ result += lhs
+ result += rhs
+ return result
+end operator
+
+operator -(lhs as List, rhs as List) as List
+ dim result as List
+ result += lhs
+ result -= rhs
+ return result
+end operator
+
+operator -(lhs as List, rhs as String) as List
+ dim result as List
+ result += lhs
+ result -= rhs
+ return result
+end operator
+
+operator -(lhs as List, rhs as Long) as List
+ dim result as List
+ result += lhs
+ result -= rhs
+ return result
+end operator
+
+operator -(lhs as List, rhs as Any ptr) as List
+ dim result as List
+ result += lhs
+ result -= rhs
+ return result
+end operator
+
+constructor List()
+ redim contents(0)
+end constructor
+
+operator List.+=(rhs as List)
+ for i as Long = 1 to rhs.Size()
+  this += rhs.ItemAt(i)
+ next
+end operator
+
+operator List.+=(rhs as String)
+ redim preserve contents(Size() + 1)
+ contents(Size()) = rhs
+end operator
+
+operator List.+=(rhs as Long)
+ this += str(rhs)
+end operator
+
+operator List.+=(rhs as Any ptr)
+ this += PointerToString(rhs)
+end operator
+
+operator List.-=(rhs as List)
+ for i as Long = 1 to rhs.Size()
+  this -= rhs.ItemAt(i)
+ next
+end operator
+
+operator List.-=(rhs as String)
+ do while ContainsItem(rhs)
+  RemoveIndex(IndexOfItem(rhs))
+ loop
+end operator
+
+operator List.-=(rhs as Any ptr)
+ this -= PointerToString(rhs)
+end operator
+
+operator List.-=(rhs as Long)
+ this -= str(rhs)
+end operator
+
+operator List.cast() as String
+ dim result as String
+ for i as Long = 1 to Size()
+  result += contents(i)
+  if i < Size() then result += ", "
+ next
+ return result
+end operator
 
 function List.ContainsItem(item as String) as Boolean
-
  return IndexOfItem(item) > 0
-
 end function
-
 
 function List.ContainsPointer(item as Any ptr) as Boolean
-
- return ContainsItem(PointerToString(item))
-
+ return IndexOfPointer(item) > 0
 end function
 
-
-function List.ContainsValue(item as Integer) as Boolean
-
- return ContainsItem(str(item))
-
+function List.ContainsValue(item as Long) as Boolean 
+ return IndexOfValue(item) > 0
 end function
 
+function List.Empty() as Boolean
+ return Size() = 0
+end function
 
-function List.IndexOfItem(item as String) as Integer
-
- dim result as Integer
- 
- for i as Integer = 1 to Length()
-  if ItemAt(i) = item then
+function List.IndexOfItem(item as String) as Long
+ dim result as Long
+ for i as Long = 1 to Size()
+  if contents(i) = item then
    result = i
    exit for
   end if
  next
- 
  return result
-
 end function
 
-
-function List.IndexOfPointer(item as Any ptr) as Integer
-
+function List.IndexOfPointer(item as Any ptr) as Long
  return IndexOfItem(PointerToString(item))
-
 end function
 
-
-function List.IndexOfValue(item as Integer) as Integer
-
+function List.IndexOfValue(item as Long) as Long
  return IndexOfItem(str(item))
-
 end function
 
-
-function List.Empty() as Boolean
-
- return (items = 0)
- 
+function List.ItemAt(index as Long) as String
+ return iif(index > Size() or index < 1, "", contents(index))
 end function
 
-
-function List.ItemAt(index as Integer) as String
-
- dim result as String = ""
- 
- if index > 0 and index <= items then result = contents[index - 1]
- 
- return result
-
+function List.ValueAt(index as Long) as Long
+ return iif(index > Size() or index < 1, 0, val(contents(index)))
 end function
 
-
-function List.Length() as Integer
-
- return items
-
+function List.PointerAt(index as Long) as Any ptr
+ return iif(index > Size() or index < 1, 0, StringToPointer(contents(index)))
 end function
 
+function List.Size() as Long
+ return ubound(contents)
+end function 
 
-function List.PointerAt(index as Integer) as Any ptr
-
- dim result as Any ptr
-
- if index > 0 and index <= Length() then result = StringToPointer(ItemAt(index))
-
- return result
-
-end function
-
-
-function List.SameItems(candidate as List) as Boolean
-
- dim same as Boolean = true
- 
- for i as Integer = 1 to Length()
-  if not candidate.ContainsItem(ItemAt(i)) then
-   same = false
-   exit for
-  end if
- next
- 
- if same then
-  for i as Integer = 1 to candidate.Length()
-   if not ContainsItem(candidate.ItemAt(i)) then
-    same = false
-    exit for
-   end if
-  next
- end if
- 
- return same
-
-end function
-
-
-function List.SamePointers(candidate as List) as Boolean
-
- dim same as Boolean = true
- 
- for i as Integer = 1 to Length()
-  if not candidate.ContainsPointer(PointerAt(i)) then
-   same = false
-   exit for
-  end if
- next
- 
- if same then
-  for i as Integer = 1 to candidate.Length()
-   if not ContainsPointer(candidate.PointerAt(i)) then
-    same = false
-    exit for
-   end if
-  next
- end if
- 
- return same
-
-end function
-
-
-function List.SameValues(candidate as List) as Boolean
-
- dim same as Boolean = true
- 
- for i as Integer = 1 to Length()
-  if not candidate.ContainsValue(ValueAt(i)) then
-   same = false
-   exit for
-  end if
- next
- 
- if same then
-  for i as Integer = 1 to candidate.Length()
-   if not ContainsValue(candidate.ValueAt(i)) then
-    same = false
-    exit for
-   end if
-  next
- end if
- 
- return same
-
-end function
-
-
-function List.Slice(start as Integer = 1, finish as Integer = 0) as List
-
+function List.Slice(start as Long = 1, finish as Long = 0) as List
  dim result as List
- 
- if items > 0 then
-  if finish = 0 then finish = items
-  if start > finish then swap start, finish
-  if start <= items then
-   if finish > items then finish = items
-   for i as Integer = start to finish
-    result.AddItem(ItemAt(i))
-   next
-  end if
- end if
- 
- return result
-
-end function
-
-
-function List.ValueAt(index as Integer) as Integer
-
- return val(ItemAt(index))
-
-end function
-
-
-function List.Width() as Integer
-
- dim result as Integer
- dim temp as Integer
- 
- for i as Integer = 1 to items
-  temp = len(ItemAt(i))
-  if temp > result then result = temp
+ if finish = 0 then finish = Size()
+ start = Max(1, start)
+ finish = Min(finish, Size())
+ for i as Long = start to finish
+  result += contents(i)
  next
- 
  return result
-
 end function
 
+function List.Width() as Long
+ dim result as Long
+ for i as Long = 1 to Size()
+  result = Max(result, len(contents(i)))
+ next
+ return result
+end function
 
 sub List.AddItem(item as String)
-
- if items > 0 then
-  items += 1
-  contents = reallocate(contents, items * SizeOf(String))
-  clear contents[items - 1], 0, SizeOf(String)
-  contents[items - 1] = item
- else
-  contents = callocate(SizeOf(String))
-  contents[0] = item
-  items = 1
- end if
-
+ this += item
 end sub
-
 
 sub List.AddPointer(item as Any ptr)
-
- AddItem(PointerToString(item))
-
+ this += PointerToString(item)
 end sub
 
-
-sub List.AddValue(item as Integer)
-
- AddItem(str(item))
-
+sub List.AddValue(item as Long)
+ this += str(item)
 end sub
 
-
-sub List.AssignItem(index as Integer, item as String)
-
- if index > 0 then
-  if index > items then
-   for i as Integer = items + 1 to index - 1
-    AddItem("")
-   next
-   AddItem(item)
-  else
-   contents[index - 1] = item
-  end if
- end if
-
+sub List.AssignItem(index as Long, item as String)
+ if index <= Size() and index >= 1 then contents(index) = item
 end sub
 
-
-sub List.AssignPointer(index as Integer, item as Any ptr)
- 
- dim p as Any ptr
- 
- p = PointerAt(index)
+sub List.AssignPointer(index as Long, item as Any ptr)
  AssignItem(index, PointerToString(item))
-
 end sub
 
-
-sub List.AssignValue(index as Integer, item as Integer)
-
+sub List.AssignValue(index as Long, item as Long)
  AssignItem(index, str(item))
-
 end sub
-
 
 sub List.Destroy()
-
- if items > 0 then
-  for i as Integer = 1 to items - 1
-   contents[i] = ""
-  next
-  deallocate(contents)
-  contents = 0
-  items = 0
- end if
- 
+ redim contents(0)
 end sub
 
-
-sub List.Exchange(index1 as Integer, index2 as Integer)
-
- if index1 > 0 and index1 <= items and index2 > 0 and index2 <= items then
-  swap contents[index1 - 1], contents[index2 - 1]
- end if
-
+sub List.Fill(last_index as Long)
+ redim contents(last_index)
 end sub
 
-
-sub List.InsertItem(index as Integer, item as String)
-
- if index > 0 and index <= items then
-  AddItem(ItemAt(items))
-  for i as Integer = items - 1 to index + 1 step - 1
-   AssignItem(i, ItemAt(i - 1))
-  next
-  AssignItem(index, item)
- end if
-
-end sub
-
-
-sub List.InsertPointer(index as Integer, item as Any ptr)
-
- InsertItem(index, PointerToString(item))
-
-end sub
-
-
-sub List.InsertValue(index as Integer, item as Integer)
-
- InsertItem(index, str(item))
-
-end sub
-
-
-sub List.Join(l as List)
-
- for i as Integer = 1 to l.Length()
-  AddItem(l.ItemAt(i))
+sub List.FillWithItem(last_index as Long, item as String)
+ for i as Long = Size() + 1 to last_index
+  this += item
  next
-
 end sub
 
-
-sub List.PrependItem(item as String)
-
- InsertItem(1, item)
-
+sub List.FillWithValue(last_index as Long, item as Long)
+ FillWithItem(last_index, str(item))
 end sub
 
-
-sub List.PrependPointer(item as Any ptr)
-
- InsertPointer(1, item)
- 
+sub List.FillWithPointer(last_index as Long, item as Any ptr)
+ FillWithItem(last_index, PointerToString(item))
 end sub
 
-
-sub List.PrependValue(item as Integer)
-
- InsertValue(1, item)
-
+sub List.InsertItem(index as Long, item as String)
+ if index <= Size() and index >= 1 then this = Slice(1, index - 1) + item + Slice(index)
 end sub
 
-
-sub List.RemoveIndex(index as Integer)
-
- if items > 0 and index <= items then
-  items -= 1
-  contents[index - 1] = ""
-  for i as Integer = index - 1 to items - 1
-   contents[i] = contents[i + 1]
-  next
-  contents = reallocate(contents, items * SizeOf(String))
- end if
- 
+sub List.InsertPointer(index as Long, item as Any ptr)
+ InsertItem(index, PointerToString(item))
 end sub
 
+sub List.InsertValue(index as Long, item as Long)
+ InsertItem(index, str(item))
+end sub
+
+sub List.RemoveIndex(index as Long)
+ if index <= Size() and index >= 1 then this = Slice(1, index - 1) + Slice(index + 1)
+end sub
 
 sub List.RemoveItem(item as String)
-
- dim index as Integer = 1
-
- do while index <= Length()
-  if ItemAt(index) = item then
-   RemoveIndex(index)
-  else
-   index += 1
-  end if
- loop
-
+ this -= item
 end sub
-
 
 sub List.RemovePointer(item as Any ptr)
-
- dim index as Integer = 1
-
- do while index <= Length()
-  if PointerAt(index) = item then
-   RemoveIndex(index)
-  else
-   index += 1
-  end if
- loop
-
+ this -= item
 end sub
 
-
-sub List.RemoveValue(item as Integer)
-
- dim index as Integer = 1
-
- do while index <= Length()
-  if ValueAt(index) = item then
-   RemoveIndex(index)
-  else
-   index += 1
-  end if
- loop
-
+sub List.RemoveValue(item as Long)
+ this -= item
 end sub

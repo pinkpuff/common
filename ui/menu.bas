@@ -78,18 +78,18 @@ function Menu.HandleKey(key as Long = 0) as Boolean
    if selected <= (window_top - 1) * columns then window_top -= 1
   end if
  case DOWN_KEY
-  if (selected + columns) <= options.Length() then
+  if (selected + columns) <= options.Size() then
    selected += columns
-   if selected > (window_top + iif(window_height = 0, RoundUp(options.Length() / columns), window_height) - 1) * columns then
+   if selected > (window_top + iif(window_height = 0, RoundUp(options.Size() / columns), window_height) - 1) * columns then
     window_top += 1
    end if
   end if
  case RIGHT_KEY
-  if selected mod columns > 0 and selected < options.Length() then selected += 1
+  if selected mod columns > 0 and selected < options.Size() then selected += 1
  case LEFT_KEY
   if selected mod columns <> 1 and columns > 1 and selected > 1 then selected -= 1
  case END_KEY
-  selected = options.Length()
+  selected = options.Size()
  case HOME_KEY
   selected = 1
  end select
@@ -123,7 +123,7 @@ end sub
 sub Menu.ChangeOption(index as Integer = 0, new_option as String)
 
  if index = 0 then index = selected
- if index > 0 and index < options.Length() then
+ if index > 0 and index < options.Size() then
   options.AssignItem(index, new_option)
  end if
 
@@ -137,8 +137,8 @@ sub Menu.Display()
  
  y = Max(y, 1)
  x = Max(x, 1)
- selected = Max(Min(selected, options.Length()), 1)
- lines = iif(window_height = 0, RoundUp(options.Length() / columns), window_height)
+ selected = Max(Min(selected, options.Size()), 1)
+ lines = iif(window_height = 0, RoundUp(options.Size() / columns), window_height)
  
  locate ,, 0
  for i as Integer = 1 to lines
@@ -164,7 +164,7 @@ sub Menu.Erase()
 
  dim lines as Integer
  
- lines = iif(window_height = 0, RoundUp(options.Length() / columns), window_height)
+ lines = iif(window_height = 0, RoundUp(options.Size() / columns), window_height)
  for i as Integer = 1 to lines
   locate y + i - 1, x
   print space(options.Width() * columns + 2 * (columns - 1));
@@ -182,7 +182,7 @@ end sub
 
 sub Menu.SelectIndex(new_index as Integer)
 
- selected = Max(Min(new_index, options.Length()), 1)
+ selected = Max(Min(new_index, options.Size()), 1)
 
 end sub
 
